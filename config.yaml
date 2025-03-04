@@ -3,7 +3,7 @@
 # --------------------------- #
 SETTINGS:
     # number of concurrent threads
-    THREADS: 1
+    THREADS: 10
     # number of retries for ANY action
     ATTEMPTS: 5
     # account range.

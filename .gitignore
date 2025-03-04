@@ -7,3 +7,4 @@ __pycache__
 test.py
 app.log
 /data/profiles
+data/private_keys.txt

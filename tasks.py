@@ -1,5 +1,6 @@
 TASKS = [
-    "FULL_TASK",
+    # "FULL_TASK",
+    "NFT"
 ]
 
 
@@ -13,6 +14,9 @@ BRIDGE_AND_SWAPS = [
     "collect_all_to_monad",
 ]
 
+NFT = [
+    "magiceden"
+]
 
 FULL_TASK = [
     ("izumi", "aircraft", "lilchogstars", "bean", "swaps"),
