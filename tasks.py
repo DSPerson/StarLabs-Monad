@@ -1,7 +1,24 @@
 TASKS = [
-    # "FULL_TASK",
-    "NFT"
+    "CRUSTY_SWAP",
 ]
+
+# MAGICEDEN WORKS ONLY WITH THESE NFT https://magiceden.io/mint-terminal/monad-testnet
+
+CRUSTY_SWAP = [
+    "crusty_refuel",
+    # "crusty_sell",
+    # "crusty_refuel_from_one_to_all",
+]
+
+FAUCET = [
+    "faucet",
+]
+
+DUSTED = [
+    "dusted",
+]
+
+GAMBLE = ["narwhal_finance"]
 
 """
 EN:
@@ -37,7 +54,7 @@ TASKS = [
     "CREATE_YOUR_OWN_TASK",
 ]
 CREATE_YOUR_OWN_TASK = [
-    "memebridge",
+    "crusty_refuel",
     ("apriori", "magma", "shmonad"),
     ["ambient", "izumi", "bean"],
     "collect_all_to_monad",
@@ -49,23 +66,14 @@ BELOW ARE THE READY-MADE TASKS THAT YOU CAN USE:
 СНИЗУ ПРИВЕДЕНЫ ГОТОВЫЕ ПРИМЕРЫ ЗАДАЧ, КОТОРЫЕ ВЫ МОЖЕТЕ ИСПОЛЬЗОВАТЬ:
 以下是您可以使用的现成任务：
 """
-FAUCET = [
-    "faucet",
-]
 
-DUSTED = [
-    "dusted",
-]
 
 BRIDGE_AND_SWAPS = [
-    "memebridge",
+    "crusty_refuel",
     ("izumi", "ambient", "bean", "swaps"),
     "collect_all_to_monad",
 ]
 
-NFT = [
-    "magiceden"
-]
 
 FULL_TASK = [
     ["izumi", "swaps", "ambient", "bean", "skip"],
@@ -92,6 +100,11 @@ BRIDGE_SEPOLIA_AND_CONVERT_TO_MON = [
     "collect_all_to_monad",
 ]
 
+SWAPS_TASK = [
+    ("izumi", "ambient", "bean", "swaps"),
+    "collect_all_to_monad",
+]
+
 STAKING_TASK = [
     ("apriori", "magma", "shmonad", "kintsu"),
 ]
@@ -107,18 +120,19 @@ EXCHANGE_AND_TESTNET_BRIDGE_TASK = [
     "collect_all_to_monad",
 ]
 
+EXCHANGE_AND_CRUSTY_SWAP_TASK = [
+    "cex_withdrawal",
+    "crusty_refuel",
+]
+
 EXCHANGE_AND_MEMEBRIDGE_TASK = [
     "cex_withdrawal",
     "memebridge",
-    "collect_all_to_monad",
 ]
 
 # FAUCETS
-# "faucet" - get tokens from faucet
-# "farm_faucet" - get tokens from faucet ON FARM ACCOUNTS (data/keys_for_faucet.txt)
 # "disperse_farm_accounts" - disperse tokens from farm accounts to main accounts | keys_for_faucet.txt -> private_keys.txt
 # "disperse_from_one_wallet" - disperse tokens from one wallet to all other wallets | keys_for_faucet.txt (first wallet) -> private_keys.txt
-# "dusted" - get tokens from dusted.app
 
 # SWAPS
 # "collect_all_to_monad" - swap all tokens to native token (MON)
@@ -126,23 +140,27 @@ EXCHANGE_AND_MEMEBRIDGE_TASK = [
 # "bean" - swap tokens on Bean DEX
 # "ambient" - swap tokens on Ambient DEX
 # "izumi" - swap tokens on Izumi DEX
-
 # STAKES
 # "apriori" - stake MON token
 # "magma" - stake MON token on Magma
 # "shmonad" - buy and stake shmon on shmonad.xyz | LOOK SETTINGS BELOW
 # "kintsu" - stake MON token on kintsu.xyz/
+# "nostra" - deposit, borrow, repay, withdraw
+# "multiplifi" - stake USDC token on https://testnet.multipli.fi/?stake-tab=stake
+# "flapsh" - buy memcoin for MON on https://monad.flap.sh/board
 
 # MINT
 # "magiceden" - mint NFT on magiceden.io
-# "accountable" - mint accountable nft
 # "owlto" - deploy contract on Owlto
 # "lilchogstars" - mint NFT on testnet.lilchogstars.com/
-# "demask" - mint NFT on app.demask.finance/launchpad/0x2cdd146aa75ffa605ff7c5cc5f62d3b52c140f9c/0
 # "monadking" - mint NFT on nerzo.xyz/monadking
 # "monadking_unlocked" - mint NFT on www.nerzo.xyz/unlocked
+# "easynode_deploy" - deploy contract on easynode.xyz
+# "onchaingm_deploy" - deploy contract on onchaingm.com/deploy
+# "monai_legacy" - mint NFT on monaigg.xyz
 
 # REFUEL
+# "crusty_refuel" - refuel from arbitrum, optimism, base to monad
 # "gaszip" - gaszip refuel from arbitrum, optimism, base to monad
 # "orbiter" - bridge ETH from Sepolia to Monad via Orbiter
 # "memebridge" - memebridge refuel from arbitrum, optimism, base to monad
@@ -150,7 +168,12 @@ EXCHANGE_AND_MEMEBRIDGE_TASK = [
 # CEX WITHDRAWAL
 # "cex_withdrawal" - withdraw tokens from cex
 
+# GAMES
+# "frontrunner" - play frontrunner game
+
 # OTHER
 # "logs" - show logs: MON balance | number of transactions | avarage balance | avarage number of transactions
 # "nad_domains" - register random domain on nad.domains
 # "aircraft" - mint NFT on aircraft.fun
+# "narwhal_finance" - play games on testnet.narwhal.finance/carnival
+# "monsternad_whitelist" - add to monsternad whitelist airdrop.monsternad.xyz/dashboard/

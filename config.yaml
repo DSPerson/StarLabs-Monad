@@ -5,7 +5,7 @@ SETTINGS:
     # number of concurrent threads
     THREADS: 1
     # number of retries for ANY action
-    ATTEMPTS: 5
+    ATTEMPTS: 3
     # account range.
     # BY DEFAULT: [0, 0] - all accounts
     # [3, 5] - only 3 4 5 accounts
@@ -17,16 +17,16 @@ SETTINGS:
     # Example: [1, 4, 6] - bot will use only 1, 4 and 6 accounts
     EXACT_ACCOUNTS_TO_USE: []
     # pause between attempts
-    PAUSE_BETWEEN_ATTEMPTS: [5, 15]
+    PAUSE_BETWEEN_ATTEMPTS: [3, 30]
     # pause between swaps
-    PAUSE_BETWEEN_SWAPS: [10, 40]
+    PAUSE_BETWEEN_SWAPS: [3, 30]
     # pause in seconds between accounts
-    RANDOM_PAUSE_BETWEEN_ACCOUNTS: [3, 15]
+    RANDOM_PAUSE_BETWEEN_ACCOUNTS: [3, 30]
     # pause in seconds between actions
-    RANDOM_PAUSE_BETWEEN_ACTIONS: [3, 10]
+    RANDOM_PAUSE_BETWEEN_ACTIONS: [3, 30]
     # random pause before start of every account
     # to make sure that all accounts will be started at different times
-    RANDOM_INITIALIZATION_PAUSE: [1, 2]
+    RANDOM_INITIALIZATION_PAUSE: [5, 30]
     # pause multiplier for browser actions
     BROWSER_PAUSE_MULTIPLIER: 1.5
     # telegram settings
@@ -38,7 +38,7 @@ SETTINGS:
 # --------------------------- #
 FLOW:
     # number of swaps. bean ambient monad etc
-    NUMBER_OF_SWAPS: [1, 3]
+    NUMBER_OF_SWAPS: [1, 1]
     # percent of balance to swap
     PERCENT_OF_BALANCE_TO_SWAP: [10, 15]
 
@@ -48,21 +48,27 @@ FLOW:
 DISPERSE:
     # if balance of main account is LESS than this value
     # bot will disperse tokens from farm accounts to main account
-    MIN_BALANCE_FOR_DISPERSE: [0.2, 0.5]
+    MIN_BALANCE_FOR_DISPERSE: [0.4, 0.5]
+
+DUSTED:
+    CLAIM: true  # or false to disable claiming rewards
+    SKIP_TWITTER_VERIFICATION: false
 
 APRIORI:
     AMOUNT_TO_STAKE: [0.0001, 0.0003]
+    STAKE: true
+    UNSTAKE: true
 
 MAGMA:
     AMOUNT_TO_STAKE: [0.0001, 0.0003]
+    STAKE: true
+    UNSTAKE: true
 
 KINTSU:
     # MINIMUM IS 0.01 $MON
     AMOUNT_TO_STAKE: [0.01, 0.02]
-
-BIMA:
-    LEND: true
-    PERCENT_OF_BALANCE_TO_LEND: [20.0, 30.0]
+    STAKE: true
+    UNSTAKE: true
 
 GASZIP:
     NETWORKS_TO_REFUEL_FROM: ["Arbitrum", "Base", "Optimism"]
@@ -71,7 +77,7 @@ GASZIP:
     WAIT_FOR_FUNDS_TO_ARRIVE: true
     MAX_WAIT_TIME: 999999
     BRIDGE_ALL: false
-    BRIDGE_ALL_MAX_AMOUNT: 0.0002
+    BRIDGE_ALL_MAX_AMOUNT: 0.01
 
 MEMEBRIDGE:
     NETWORKS_TO_REFUEL_FROM: ["Arbitrum", "Base", "Optimism"]
@@ -80,7 +86,18 @@ MEMEBRIDGE:
     WAIT_FOR_FUNDS_TO_ARRIVE: true
     MAX_WAIT_TIME: 999999
     BRIDGE_ALL: false
-    BRIDGE_ALL_MAX_AMOUNT: 0.0002
+    BRIDGE_ALL_MAX_AMOUNT: 0.01
+
+CRUSTY_SWAP:
+    NETWORKS_TO_REFUEL_FROM: ["Arbitrum", "Optimism", "Base"]
+    AMOUNT_TO_REFUEL: [0.0001, 0.00015]
+    MINIMUM_BALANCE_TO_REFUEL: 99999
+    WAIT_FOR_FUNDS_TO_ARRIVE: true
+    MAX_WAIT_TIME: 999999
+    BRIDGE_ALL: false
+    BRIDGE_ALL_MAX_AMOUNT: 0.01
+    SELL_PERCENT_OF_BALANCE: [50, 80]
+    SELL_MAXIMUM_AMOUNT: 100
 
 TESTNET_BRIDGE:
     NETWORKS_TO_REFUEL_FROM: ["Arbitrum", "Optimism"]
@@ -88,15 +105,24 @@ TESTNET_BRIDGE:
     MINIMUM_BALANCE_TO_REFUEL: 5.0
     WAIT_FOR_FUNDS_TO_ARRIVE: true
     MAX_WAIT_TIME: 999999
+    BRIDGE_ALL: false
+    BRIDGE_ALL_MAX_AMOUNT: 0.01
+
+NOSTRA:
+    PERCENT_OF_BALANCE_TO_DEPOSIT: [3, 15]
+    DEPOSIT: true
+    BORROW: true
+    REPAY: true
+    WITHDRAW: true
+
+OCTO_SWAP:
+    SWAP_ALL_TO_MONAD: true
 
 SHMONAD:
     BUY_AND_STAKE_SHMON: true
     UNSTAKE_AND_SELL_SHMON: true
     # percent of balance to swap on shmonad.xyz
     PERCENT_OF_BALANCE_TO_SWAP: [2, 3]
-
-ACCOUNTABLE:
-    NFT_PER_ACCOUNT_LIMIT: 3
 
 ORBITER:
     AMOUNT_TO_BRIDGE: [0.1, 0.2]
@@ -107,29 +133,35 @@ ORBITER:
 LILCHOGSTARS:
     MAX_AMOUNT_FOR_EACH_ACCOUNT: [1, 3]
 
-DEMASK:
-    MAX_AMOUNT_FOR_EACH_ACCOUNT: [1, 3]
 
-# monadking or monadking_unlocked
+# monadking or monadking_unlocked 
 MONADKING:
     MAX_AMOUNT_FOR_EACH_ACCOUNT: [1, 3]
 
+FRONT_RUNNER:
+    MAX_AMOUNT_TRANSACTIONS_FOR_ONE_RUN: [1, 3]
+    PAUSE_BETWEEN_TRANSACTIONS: [10, 30]
+
 MAGICEDEN:
     NFT_CONTRACTS: [
-        "0xb81fbb4362a586fdb3edfe261b2e1bbe73e6cd67",  # 0.01 $MON
-        "0x281df2c9178aa2dfd229771ef8f03cce90e60373",  # 0.01 $MON
-        "0x002c8fd766605b609d31cc9764e27289daf033e9",  # 0.001 $MON
-        "0x471af5eb201adc7851f4abec99ba1c78e51de0ce",  # 0.01 $MON
-        "0x63300257926af6f2a1bf2d4efb4240d8d8f250d6",  # free
-        "0xfd3b54bd826cea09d15e87f95a869ecf3e462f92",  # free
-        "0xb2ea0ff3ad4134367fb7dc75d48b3493e5a09c81",
-        "0x74e9115cfcaa5edbfc6670139c0b2a2833fc64ed",
-        "0xdecbb47872961d27275d68ae651e1956ef609f42"
+        "0x9e313cbd57a35661072c1b96684454cebd09acdc"
     ]
 
 FAUCET:
+    USE_SOLVIUM_FOR_CLOUDFLARE: true
+    # CHEAPEST CAPTCHA SOLVER - https://t.me/solvium_crypto_bot
+    SOLVIUM_API_KEY: awdawdadawdadawd
+
+    # optional
+    USE_CAPSOLVER_FOR_CLOUDFLARE: false
     CAPSOLVER_API_KEY: CAP-
 
+    # Using Nocaptcha by default
+    NOCAPTCHA_API_KEY: ""
+    # if does not work without proxy, set proxy here
+    # format: username:password@ip:port
+    PROXY_FOR_NOCAPTCHA: "x"
+    
 # --------------------------- #
 # EXCHANGES SECTION
 # --------------------------- #
@@ -147,3 +179,29 @@ EXCHANGES:
           wait_for_funds: true
           max_wait_time: 99999  # in seconds
           retries: 3
+
+
+MONAIYAKUZA:
+    MAX_PER_ACCOUNT: [1, 1]
+
+
+NARWHAL_FINANCE:
+    # AMOUNT OF USDT TO PLAY
+    AMOUNT_USDT_FOR_BET: [5, 50]
+    # Will play random number of bets and choose random game
+    NUMBER_OF_BETS_PER_START: [1, 3]
+
+    PLAY_SLOTS: true
+    PLAY_DICE: true
+    PLAY_COINFLIP: true
+
+
+FLAPSH:
+    # Amount of mon we will buy memcoin for
+    AMOUNT_TO_PAY: [0.0001, 0.0003]
+    # how many memcoins we will buy per run
+    NUMBER_OF_MEMCOINS_TO_BUY: [1, 3]
+    # Addresses of the memcoins we will buy (takes random from list)
+    # if the list is empty, the bot will parse the list of memcoins from the flapsh.xyz
+    TOKEN_ADDRESS: []
+

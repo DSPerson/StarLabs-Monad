@@ -9,6 +9,7 @@ from src.utils.constants import EXPLORER_URL, RPC_URL
 from src.utils.config import Config
 from loguru import logger
 
+
 # Обновляем ABI для ERC1155
 ERC1155_ABI = [
     {
@@ -47,9 +48,13 @@ class MonadverseMint:
         self.session = session
 
         self.account: Account = Account.from_key(private_key=private_key)
-        self.web3 = AsyncWeb3(AsyncWeb3.AsyncHTTPProvider(RPC_URL))
-
-        self.nft_contract_address = "0x3A9acc3Be6E9678FA5D23810488c37a3192aaf75"
+        self.web3 = AsyncWeb3(
+             AsyncWeb3.AsyncHTTPProvider(
+                 RPC_URL,
+                 request_kwargs={"proxy": (f"http://{proxy}"), "ssl": False},
+             )
+        ) 
+        self.nft_contract_address = "0xba838E4Cca4b852e1AebD32f248967aD98C3AA45"
         self.nft_contract: Contract = self.web3.eth.contract(
             address=self.nft_contract_address, abi=ERC1155_ABI
         )
@@ -62,7 +67,7 @@ class MonadverseMint:
         """
         try:
             balance = await self.nft_contract.functions.balanceOf(
-                self.account.address, 2  # ID токена из транзакции
+                self.account.address, 5  # Updated token ID
             ).call()
 
             return balance
@@ -74,7 +79,7 @@ class MonadverseMint:
         for retry in range(self.config.SETTINGS.ATTEMPTS):
             try:
                 balance = await self.get_nft_balance()
-
+        
                 if balance > 0:
                     logger.success(
                         f"[{self.account_index}] Monadverse NFT already minted"
@@ -88,8 +93,8 @@ class MonadverseMint:
                     {
                         "from": self.account.address,
                         "value": self.web3.to_wei(
-                            0.5, "ether"
-                        ),  # Обновляем оплату до 0.5 MON
+                            1.79, "ether"  # Updated minting value
+                        ),
                         "nonce": await self.web3.eth.get_transaction_count(
                             self.account.address
                         ),

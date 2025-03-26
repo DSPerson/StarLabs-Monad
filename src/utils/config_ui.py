@@ -124,6 +124,22 @@ class ConfigUI:
         with open(config_path, "r") as file:
             self.config = yaml.safe_load(file)
 
+        # Проверяем наличие всех необходимых секций
+        if "NARWHAL_FINANCE" not in self.config:
+            self.config["NARWHAL_FINANCE"] = {
+                "AMOUNT_USDT_FOR_BET": [5, 50],
+                "NUMBER_OF_BETS_PER_START": [1, 3],
+                "PLAY_SLOTS": True,
+                "PLAY_DICE": True,
+                "PLAY_COINFLIP": True,
+            }
+
+        if "MONAIYAKUZA" not in self.config:
+            self.config["MONAIYAKUZA"] = {"MAX_PER_ACCOUNT": [1, 1]}
+
+        if "OCTO_SWAP" not in self.config:
+            self.config["OCTO_SWAP"] = {"SWAP_ALL_TO_MONAD": False}
+
     def create_range_inputs(self, parent, label, config_value, width=120):
         frame = ctk.CTkFrame(parent, fg_color=self.colors["frame_bg"])
         frame.pack(fill="x", pady=5)
@@ -242,7 +258,7 @@ class ConfigUI:
         )
         header.pack(fill="x", pady=(20, 10), padx=5)
 
-    def create_network_checkboxes(self, parent, label, config_value):
+    def create_network_checkboxes(self, parent, label, config_value, available_networks=None):
         frame = ctk.CTkFrame(parent, fg_color=self.colors["frame_bg"])
         frame.pack(fill="x", pady=5)
 
@@ -259,7 +275,8 @@ class ConfigUI:
         networks_frame = ctk.CTkFrame(frame, fg_color=self.colors["frame_bg"])
         networks_frame.pack(fill="x", padx=10, pady=5)
 
-        networks = ["Arbitrum", "Base", "Optimism"]
+        # Use provided networks or default to the standard three
+        networks = available_networks or ["Arbitrum", "Base", "Optimism"]
         checkboxes = []
 
         for network in networks:
@@ -467,10 +484,22 @@ class ConfigUI:
             width=self.input_sizes["extra_large"],
         )
 
-        # Faucets Category
+        # FAUCET Category
         self.create_category_header(left_column, "🚰 FAUCETS")
 
         faucet = self.create_section(left_column, "FAUCET")
+        self.nocaptcha_key = self.create_single_input(
+            faucet, "NOCAPTCHA_API_KEY", self.config["FAUCET"]["NOCAPTCHA_API_KEY"]
+        )
+        self.proxy_nocaptcha = self.create_single_input(
+            faucet, "PROXY_FOR_NOCAPTCHA", self.config["FAUCET"]["PROXY_FOR_NOCAPTCHA"]
+        )
+        # Add new Cloudflare settings
+        self.use_capsolver = self.create_checkbox(
+            faucet,
+            "USE_CAPSOLVER_FOR_CLOUDFLARE",
+            self.config["FAUCET"]["USE_CAPSOLVER_FOR_CLOUDFLARE"],
+        )
         self.capsolver_key = self.create_single_input(
             faucet, "CAPSOLVER_API_KEY", self.config["FAUCET"]["CAPSOLVER_API_KEY"]
         )
@@ -480,6 +509,21 @@ class ConfigUI:
             disperse,
             "MIN_BALANCE_FOR_DISPERSE",
             self.config["DISPERSE"]["MIN_BALANCE_FOR_DISPERSE"],
+        )
+
+        # DUSTED Category
+        dusted = self.create_section(left_column, "DUSTED")
+        self.dusted_claim = self.create_checkbox(
+            dusted,
+            "CLAIM",
+            self.config["DUSTED"]["CLAIM"],
+        )
+
+        # Add the SKIP_TWITTER_VERIFICATION checkbox after the CLAIM checkbox
+        self.dusted_skip_twitter_verification = self.create_checkbox(
+            dusted,
+            "SKIP_TWITTER_VERIFICATION",
+            self.config["DUSTED"]["SKIP_TWITTER_VERIFICATION"],
         )
 
         # Swaps Category
@@ -498,29 +542,12 @@ class ConfigUI:
         # NFT Category
         self.create_category_header(left_column, "🎨 NFT")
 
-        # Add ACCOUNTABLE section
-        accountable = self.create_section(left_column, "ACCOUNTABLE")
-        self.accountable_limit = self.create_single_input(
-            accountable,
-            "NFT_PER_ACCOUNT_LIMIT",
-            self.config["ACCOUNTABLE"]["NFT_PER_ACCOUNT_LIMIT"],
-            width=100,
-        )
-
         # Add LILCHOGSTARS section
         lilchog = self.create_section(left_column, "LILCHOGSTARS")
         self.lilchog_amount_min, self.lilchog_amount_max = self.create_range_inputs(
             lilchog,
             "MAX_AMOUNT_FOR_EACH_ACCOUNT",
             self.config["LILCHOGSTARS"]["MAX_AMOUNT_FOR_EACH_ACCOUNT"],
-        )
-
-        # Add DEMASK section
-        demask = self.create_section(left_column, "DEMASK")
-        self.demask_amount_min, self.demask_amount_max = self.create_range_inputs(
-            demask,
-            "MAX_AMOUNT_FOR_EACH_ACCOUNT",
-            self.config["DEMASK"]["MAX_AMOUNT_FOR_EACH_ACCOUNT"],
         )
 
         # Add MONADKING section
@@ -539,6 +566,21 @@ class ConfigUI:
             self.config["MAGICEDEN"]["NFT_CONTRACTS"],
         )
 
+        # FRONT_RUNNER
+        frame_front_runner = self.create_section(right_column, "FRONT_RUNNER")
+
+        self.max_transactions_for_one_run = self.create_range_inputs(
+            frame_front_runner,
+            "MAX_AMOUNT_TRANSACTIONS_FOR_ONE_RUN:",
+            self.config["FRONT_RUNNER"]["MAX_AMOUNT_TRANSACTIONS_FOR_ONE_RUN"],
+        )
+
+        self.pause_between_transactions = self.create_range_inputs(
+            frame_front_runner,
+            "PAUSE_BETWEEN_TRANSACTIONS:",
+            self.config["FRONT_RUNNER"]["PAUSE_BETWEEN_TRANSACTIONS"],
+        )
+
         # RIGHT COLUMN
 
         # Staking Category
@@ -548,15 +590,45 @@ class ConfigUI:
         self.apriori_stake_min, self.apriori_stake_max = self.create_range_inputs(
             apriori, "AMOUNT_TO_STAKE", self.config["APRIORI"]["AMOUNT_TO_STAKE"]
         )
+        self.apriori_stake = self.create_checkbox(
+            apriori,
+            "STAKE",
+            self.config["APRIORI"]["STAKE"],
+        )
+        self.apriori_unstake = self.create_checkbox(
+            apriori,
+            "UNSTAKE",
+            self.config["APRIORI"]["UNSTAKE"],
+        )
 
         magma = self.create_section(right_column, "MAGMA")
         self.magma_stake_min, self.magma_stake_max = self.create_range_inputs(
             magma, "AMOUNT_TO_STAKE", self.config["MAGMA"]["AMOUNT_TO_STAKE"]
         )
+        self.magma_stake = self.create_checkbox(
+            magma,
+            "STAKE",
+            self.config["MAGMA"]["STAKE"],
+        )
+        self.magma_unstake = self.create_checkbox(
+            magma,
+            "UNSTAKE",
+            self.config["MAGMA"]["UNSTAKE"],
+        )
 
         kintsu = self.create_section(right_column, "KINTSU")
         self.kintsu_stake_min, self.kintsu_stake_max = self.create_range_inputs(
             kintsu, "AMOUNT_TO_STAKE", self.config["KINTSU"]["AMOUNT_TO_STAKE"]
+        )
+        self.kintsu_stake = self.create_checkbox(
+            kintsu,
+            "STAKE",
+            self.config["KINTSU"]["STAKE"],
+        )
+        self.kintsu_unstake = self.create_checkbox(
+            kintsu,
+            "UNSTAKE",
+            self.config["KINTSU"]["UNSTAKE"],
         )
 
         shmonad = self.create_section(right_column, "SHMONAD")
@@ -578,6 +650,61 @@ class ConfigUI:
 
         # Bridge & Refuel Category
         self.create_category_header(right_column, "🌉 BRIDGE & REFUEL")
+
+        # Add CRUSTY_SWAP section as the first item
+        crusty_swap = self.create_section(right_column, "CRUSTY_SWAP")
+        self.crusty_swap_networks = self.create_network_checkboxes(
+            crusty_swap,
+            "NETWORKS_TO_REFUEL_FROM",
+            self.config["CRUSTY_SWAP"]["NETWORKS_TO_REFUEL_FROM"],
+            # available_networks=["Arbitrum", "Base", "Optimism", "ZkSync"]
+            available_networks=["Arbitrum", "Base", "Optimism"]
+        )
+        self.crusty_swap_amount_min, self.crusty_swap_amount_max = self.create_range_inputs(
+            crusty_swap,
+            "AMOUNT_TO_REFUEL",
+            self.config["CRUSTY_SWAP"]["AMOUNT_TO_REFUEL"],
+        )
+        self.crusty_swap_min_balance = self.create_single_input(
+            crusty_swap,
+            "MINIMUM_BALANCE_TO_REFUEL",
+            self.config["CRUSTY_SWAP"]["MINIMUM_BALANCE_TO_REFUEL"],
+            width=self.input_sizes["tiny"],
+        )
+        self.crusty_swap_wait = self.create_checkbox(
+            crusty_swap,
+            "WAIT_FOR_FUNDS_TO_ARRIVE",
+            self.config["CRUSTY_SWAP"]["WAIT_FOR_FUNDS_TO_ARRIVE"],
+        )
+        self.crusty_swap_wait_time = self.create_single_input(
+            crusty_swap,
+            "MAX_WAIT_TIME",
+            self.config["CRUSTY_SWAP"]["MAX_WAIT_TIME"],
+            width=self.input_sizes["tiny"],
+        )
+        self.crusty_swap_bridge_all = self.create_checkbox(
+            crusty_swap,
+            "BRIDGE_ALL (bridge maximum available balance)",
+            self.config["CRUSTY_SWAP"]["BRIDGE_ALL"],
+        )
+        self.crusty_swap_bridge_max = self.create_single_input(
+            crusty_swap,
+            "BRIDGE_ALL_MAX_AMOUNT (max to bridge with 1-3% random reduction)",
+            self.config["CRUSTY_SWAP"]["BRIDGE_ALL_MAX_AMOUNT"],
+            width=self.input_sizes["small"],
+        )
+        # Add CRUSTY_SWAP specific fields
+        self.crusty_swap_sell_min, self.crusty_swap_sell_max = self.create_range_inputs(
+            crusty_swap,
+            "SELL_PERCENT_OF_BALANCE",
+            self.config["CRUSTY_SWAP"]["SELL_PERCENT_OF_BALANCE"],
+        )
+        self.crusty_swap_sell_max_amount = self.create_single_input(
+            crusty_swap,
+            "SELL_MAXIMUM_AMOUNT",
+            self.config["CRUSTY_SWAP"]["SELL_MAXIMUM_AMOUNT"],
+            width=self.input_sizes["small"],
+        )
 
         # Add GASZIP section
         gaszip = self.create_section(right_column, "GASZIP")
@@ -667,6 +794,7 @@ class ConfigUI:
             testnet,
             "NETWORKS_TO_REFUEL_FROM",
             self.config["TESTNET_BRIDGE"]["NETWORKS_TO_REFUEL_FROM"],
+            available_networks=["Arbitrum", "Optimism"]
         )
         self.testnet_amount_min, self.testnet_amount_max = self.create_range_inputs(
             testnet,
@@ -689,6 +817,21 @@ class ConfigUI:
             "MAX_WAIT_TIME",
             self.config["TESTNET_BRIDGE"]["MAX_WAIT_TIME"],
             width=self.input_sizes["tiny"],
+        )
+
+        # Add the BRIDGE_ALL checkbox
+        self.testnet_bridge_all = self.create_checkbox(
+            testnet,
+            "BRIDGE_ALL",
+            self.config["TESTNET_BRIDGE"]["BRIDGE_ALL"],
+        )
+
+        # Add the BRIDGE_ALL_MAX_AMOUNT input
+        self.testnet_bridge_max = self.create_single_input(
+            testnet,
+            "BRIDGE_ALL_MAX_AMOUNT",
+            self.config["TESTNET_BRIDGE"]["BRIDGE_ALL_MAX_AMOUNT"],
+            width=100,
         )
 
         orbiter = self.create_section(right_column, "ORBITER")
@@ -714,7 +857,7 @@ class ConfigUI:
         # Exchange selection
         exchange_frame = ctk.CTkFrame(exchanges, fg_color=self.colors["frame_bg"])
         exchange_frame.pack(fill="x", pady=5)
-        
+
         ctk.CTkLabel(
             exchange_frame,
             text="Exchange:",
@@ -760,7 +903,7 @@ class ConfigUI:
         # Withdrawal settings
         withdrawal_frame = ctk.CTkFrame(exchanges, fg_color=self.colors["frame_bg"])
         withdrawal_frame.pack(fill="x", pady=5)
-        
+
         ctk.CTkLabel(
             withdrawal_frame,
             text="Withdrawal Settings",
@@ -784,13 +927,15 @@ class ConfigUI:
         )
 
         # Min/Max amount
-        self.withdrawal_min_amount, self.withdrawal_max_amount = self.create_range_inputs(
-            withdrawal_frame,
-            "Amount Range",
-            [
-                self.config["EXCHANGES"]["withdrawals"][0]["min_amount"],
-                self.config["EXCHANGES"]["withdrawals"][0]["max_amount"],
-            ],
+        self.withdrawal_min_amount, self.withdrawal_max_amount = (
+            self.create_range_inputs(
+                withdrawal_frame,
+                "Amount Range",
+                [
+                    self.config["EXCHANGES"]["withdrawals"][0]["min_amount"],
+                    self.config["EXCHANGES"]["withdrawals"][0]["max_amount"],
+                ],
+            )
         )
 
         # Max wallet balance
@@ -820,6 +965,72 @@ class ConfigUI:
             "Retries",
             self.config["EXCHANGES"]["withdrawals"][0]["retries"],
             width=self.input_sizes["tiny"],
+        )
+
+        # Add NOSTRA section
+        nostra = self.create_section(right_column, "NOSTRA")
+        self.nostra_deposit_min, self.nostra_deposit_max = self.create_range_inputs(
+            nostra,
+            "PERCENT_OF_BALANCE_TO_DEPOSIT",
+            self.config["NOSTRA"]["PERCENT_OF_BALANCE_TO_DEPOSIT"],
+        )
+        self.nostra_deposit = self.create_checkbox(
+            nostra,
+            "DEPOSIT",
+            self.config["NOSTRA"]["DEPOSIT"],
+        )
+        self.nostra_borrow = self.create_checkbox(
+            nostra,
+            "BORROW",
+            self.config["NOSTRA"]["BORROW"],
+        )
+        self.nostra_repay = self.create_checkbox(
+            nostra,
+            "REPAY",
+            self.config["NOSTRA"]["REPAY"],
+        )
+        self.nostra_withdraw = self.create_checkbox(
+            nostra,
+            "WITHDRAW",
+            self.config["NOSTRA"]["WITHDRAW"],
+        )
+
+        # Add NARWHAL_FINANCE section
+        self.create_category_header(right_column, "💸 NARWHAL FINANCE")
+        narwhal = self.create_section(right_column, "NARWHAL_FINANCE")
+
+        # Проверяем существование раздела в конфиге
+        if "NARWHAL_FINANCE" not in self.config:
+            self.config["NARWHAL_FINANCE"] = {}
+
+        self.narwhal_amount_min, self.narwhal_amount_max = self.create_range_inputs(
+            narwhal,
+            "AMOUNT_USDT_FOR_BET",
+            self.config["NARWHAL_FINANCE"]["AMOUNT_USDT_FOR_BET"],
+        )
+
+        self.narwhal_bets_min, self.narwhal_bets_max = self.create_range_inputs(
+            narwhal,
+            "NUMBER_OF_BETS_PER_START",
+            self.config["NARWHAL_FINANCE"]["NUMBER_OF_BETS_PER_START"],
+        )
+
+        self.narwhal_slots = self.create_checkbox(
+            narwhal,
+            "PLAY_SLOTS",
+            self.config["NARWHAL_FINANCE"]["PLAY_SLOTS"],
+        )
+
+        self.narwhal_dice = self.create_checkbox(
+            narwhal,
+            "PLAY_DICE",
+            self.config["NARWHAL_FINANCE"]["PLAY_DICE"],
+        )
+
+        self.narwhal_coinflip = self.create_checkbox(
+            narwhal,
+            "PLAY_COINFLIP",
+            self.config["NARWHAL_FINANCE"]["PLAY_COINFLIP"],
         )
 
     def _save_and_close(self):
@@ -873,6 +1084,32 @@ class ConfigUI:
         ]
         self.config["SETTINGS"]["TELEGRAM_BOT_TOKEN"] = self.telegram_token.get()
 
+        # FAUCET
+        self.config["FAUCET"]["NOCAPTCHA_API_KEY"] = self.nocaptcha_key.get()
+        self.config["FAUCET"]["PROXY_FOR_NOCAPTCHA"] = self.proxy_nocaptcha.get()
+        self.config["FAUCET"]["USE_CAPSOLVER_FOR_CLOUDFLARE"] = bool(
+            self.use_capsolver.get()
+        )
+        self.config["FAUCET"]["CAPSOLVER_API_KEY"] = self.capsolver_key.get()
+
+        # Добавляем поля для Solvium, которые есть в config.py
+        if "USE_SOLVIUM_FOR_CLOUDFLARE" not in self.config["FAUCET"]:
+            self.config["FAUCET"]["USE_SOLVIUM_FOR_CLOUDFLARE"] = False
+        if "SOLVIUM_API_KEY" not in self.config["FAUCET"]:
+            self.config["FAUCET"]["SOLVIUM_API_KEY"] = ""
+
+        # DISPERSE
+        self.config["DISPERSE"]["MIN_BALANCE_FOR_DISPERSE"] = [
+            float(self.min_balance_min.get()),
+            float(self.min_balance_max.get()),
+        ]
+
+        # DUSTED
+        self.config["DUSTED"]["CLAIM"] = True if self.dusted_claim.get() else False
+        self.config["DUSTED"]["SKIP_TWITTER_VERIFICATION"] = (
+            True if self.dusted_skip_twitter_verification.get() else False
+        )
+
         # FLOW
         self.config["FLOW"]["NUMBER_OF_SWAPS"] = [
             int(float(self.swaps_min.get())),
@@ -883,32 +1120,31 @@ class ConfigUI:
             int(float(self.balance_swap_max.get())),
         ]
 
-        # FAUCET
-        self.config["FAUCET"]["CAPSOLVER_API_KEY"] = self.capsolver_key.get()
-
-        # DISPERSE
-        self.config["DISPERSE"]["MIN_BALANCE_FOR_DISPERSE"] = [
-            float(self.min_balance_min.get()),
-            float(self.min_balance_max.get()),
-        ]
-
         # APRIORI
         self.config["APRIORI"]["AMOUNT_TO_STAKE"] = [
             float(self.apriori_stake_min.get()),
             float(self.apriori_stake_max.get()),
         ]
+        self.config["APRIORI"]["STAKE"] = True if self.apriori_stake.get() else False
+        self.config["APRIORI"]["UNSTAKE"] = (
+            True if self.apriori_unstake.get() else False
+        )
 
         # MAGMA
         self.config["MAGMA"]["AMOUNT_TO_STAKE"] = [
             float(self.magma_stake_min.get()),
             float(self.magma_stake_max.get()),
         ]
+        self.config["MAGMA"]["STAKE"] = True if self.magma_stake.get() else False
+        self.config["MAGMA"]["UNSTAKE"] = True if self.magma_unstake.get() else False
 
         # KINTSU
         self.config["KINTSU"]["AMOUNT_TO_STAKE"] = [
             float(self.kintsu_stake_min.get()),
             float(self.kintsu_stake_max.get()),
         ]
+        self.config["KINTSU"]["STAKE"] = True if self.kintsu_stake.get() else False
+        self.config["KINTSU"]["UNSTAKE"] = True if self.kintsu_unstake.get() else False
 
         # GASZIP
         self.config["GASZIP"]["NETWORKS_TO_REFUEL_FROM"] = [
@@ -921,10 +1157,16 @@ class ConfigUI:
         self.config["GASZIP"]["MINIMUM_BALANCE_TO_REFUEL"] = float(
             self.gaszip_min_balance.get()
         )
-        self.config["GASZIP"]["WAIT_FOR_FUNDS_TO_ARRIVE"] = self.gaszip_wait.get()
+        self.config["GASZIP"]["WAIT_FOR_FUNDS_TO_ARRIVE"] = (
+            True if self.gaszip_wait.get() else False
+        )
         self.config["GASZIP"]["MAX_WAIT_TIME"] = int(self.gaszip_wait_time.get())
-        self.config["GASZIP"]["BRIDGE_ALL"] = self.gaszip_bridge_all.get()
-        self.config["GASZIP"]["BRIDGE_ALL_MAX_AMOUNT"] = float(self.gaszip_bridge_max.get())
+        self.config["GASZIP"]["BRIDGE_ALL"] = (
+            True if self.gaszip_bridge_all.get() else False
+        )
+        self.config["GASZIP"]["BRIDGE_ALL_MAX_AMOUNT"] = float(
+            self.gaszip_bridge_max.get()
+        )
 
         # MEMEBRIDGE
         self.config["MEMEBRIDGE"]["NETWORKS_TO_REFUEL_FROM"] = [
@@ -937,14 +1179,18 @@ class ConfigUI:
         self.config["MEMEBRIDGE"]["MINIMUM_BALANCE_TO_REFUEL"] = float(
             self.memebridge_min_balance.get()
         )
-        self.config["MEMEBRIDGE"][
-            "WAIT_FOR_FUNDS_TO_ARRIVE"
-        ] = self.memebridge_wait.get()
+        self.config["MEMEBRIDGE"]["WAIT_FOR_FUNDS_TO_ARRIVE"] = (
+            True if self.memebridge_wait.get() else False
+        )
         self.config["MEMEBRIDGE"]["MAX_WAIT_TIME"] = int(
             self.memebridge_wait_time.get()
         )
-        self.config["MEMEBRIDGE"]["BRIDGE_ALL"] = self.memebridge_bridge_all.get()
-        self.config["MEMEBRIDGE"]["BRIDGE_ALL_MAX_AMOUNT"] = float(self.memebridge_bridge_max.get())
+        self.config["MEMEBRIDGE"]["BRIDGE_ALL"] = (
+            True if self.memebridge_bridge_all.get() else False
+        )
+        self.config["MEMEBRIDGE"]["BRIDGE_ALL_MAX_AMOUNT"] = float(
+            self.memebridge_bridge_max.get()
+        )
 
         # TESTNET_BRIDGE
         self.config["TESTNET_BRIDGE"]["NETWORKS_TO_REFUEL_FROM"] = [
@@ -957,28 +1203,23 @@ class ConfigUI:
         self.config["TESTNET_BRIDGE"]["MINIMUM_BALANCE_TO_REFUEL"] = float(
             self.testnet_min_balance.get()
         )
-        self.config["TESTNET_BRIDGE"][
-            "WAIT_FOR_FUNDS_TO_ARRIVE"
-        ] = self.testnet_wait.get()
+        self.config["TESTNET_BRIDGE"]["WAIT_FOR_FUNDS_TO_ARRIVE"] = (
+            True if self.testnet_wait.get() else False
+        )
         self.config["TESTNET_BRIDGE"]["MAX_WAIT_TIME"] = int(
             self.testnet_wait_time.get()
         )
-
-        # ACCOUNTABLE
-        self.config["ACCOUNTABLE"]["NFT_PER_ACCOUNT_LIMIT"] = int(
-            self.accountable_limit.get()
+        self.config["TESTNET_BRIDGE"]["BRIDGE_ALL"] = (
+            True if self.testnet_bridge_all.get() else False
+        )
+        self.config["TESTNET_BRIDGE"]["BRIDGE_ALL_MAX_AMOUNT"] = float(
+            self.testnet_bridge_max.get()
         )
 
         # LILCHOGSTARS
         self.config["LILCHOGSTARS"]["MAX_AMOUNT_FOR_EACH_ACCOUNT"] = [
             int(self.lilchog_amount_min.get()),
             int(self.lilchog_amount_max.get()),
-        ]
-
-        # DEMASK
-        self.config["DEMASK"]["MAX_AMOUNT_FOR_EACH_ACCOUNT"] = [
-            int(self.demask_amount_min.get()),
-            int(self.demask_amount_max.get()),
         ]
 
         # MONADKING
@@ -994,9 +1235,23 @@ class ConfigUI:
             if x.strip()
         ]
 
+        # FRONT_RUNNER
+        self.config["FRONT_RUNNER"]["MAX_AMOUNT_TRANSACTIONS_FOR_ONE_RUN"] = [
+            int(self.max_transactions_for_one_run[0].get()),
+            int(self.max_transactions_for_one_run[1].get()),
+        ]
+        self.config["FRONT_RUNNER"]["PAUSE_BETWEEN_TRANSACTIONS"] = [
+            int(self.pause_between_transactions[0].get()),
+            int(self.pause_between_transactions[1].get()),
+        ]
+
         # SHMONAD
-        self.config["SHMONAD"]["BUY_AND_STAKE_SHMON"] = self.buy_stake.get()
-        self.config["SHMONAD"]["UNSTAKE_AND_SELL_SHMON"] = self.unstake_sell.get()
+        self.config["SHMONAD"]["BUY_AND_STAKE_SHMON"] = (
+            True if self.buy_stake.get() else False
+        )
+        self.config["SHMONAD"]["UNSTAKE_AND_SELL_SHMON"] = (
+            True if self.unstake_sell.get() else False
+        )
         self.config["SHMONAD"]["PERCENT_OF_BALANCE_TO_SWAP"] = [
             int(float(self.shmonad_percent_min.get())),
             int(float(self.shmonad_percent_max.get())),
@@ -1007,8 +1262,10 @@ class ConfigUI:
             float(self.orbiter_amount_min.get()),
             float(self.orbiter_amount_max.get()),
         ]
-        self.config["ORBITER"]["BRIDGE_ALL"] = self.bridge_all.get()
-        self.config["ORBITER"]["WAIT_FOR_FUNDS_TO_ARRIVE"] = self.orbiter_wait.get()
+        self.config["ORBITER"]["BRIDGE_ALL"] = True if self.bridge_all.get() else False
+        self.config["ORBITER"]["WAIT_FOR_FUNDS_TO_ARRIVE"] = (
+            True if self.orbiter_wait.get() else False
+        )
         self.config["ORBITER"]["MAX_WAIT_TIME"] = int(self.orbiter_wait_time.get())
 
         # EXCHANGES
@@ -1016,79 +1273,136 @@ class ConfigUI:
         self.config["EXCHANGES"]["apiKey"] = self.exchange_api_key.get()
         self.config["EXCHANGES"]["secretKey"] = self.exchange_secret_key.get()
         self.config["EXCHANGES"]["passphrase"] = self.exchange_passphrase.get()
-        
+
         # Update withdrawals configuration
-        self.config["EXCHANGES"]["withdrawals"] = [{
-            "currency": self.withdrawal_currency.get(),
-            "networks": [
-                network for network, var in self.withdrawal_networks if var.get()
-            ],
-            "min_amount": float(self.withdrawal_min_amount.get()),
-            "max_amount": float(self.withdrawal_max_amount.get()),
-            "max_balance": float(self.withdrawal_max_balance.get()),
-            "wait_for_funds": self.withdrawal_wait.get(),
-            "max_wait_time": int(self.withdrawal_wait_time.get()),
-            "retries": int(self.withdrawal_retries.get())
-        }]
+        self.config["EXCHANGES"]["withdrawals"] = [
+            {
+                "currency": self.withdrawal_currency.get(),
+                "networks": [
+                    network for network, var in self.withdrawal_networks if var.get()
+                ],
+                "min_amount": float(self.withdrawal_min_amount.get()),
+                "max_amount": float(self.withdrawal_max_amount.get()),
+                "max_balance": float(self.withdrawal_max_balance.get()),
+                "wait_for_funds": True if self.withdrawal_wait.get() else False,
+                "max_wait_time": int(self.withdrawal_wait_time.get()),
+                "retries": int(self.withdrawal_retries.get()),
+            }
+        ]
+
+        # NOSTRA
+        self.config["NOSTRA"]["PERCENT_OF_BALANCE_TO_DEPOSIT"] = [
+            float(self.nostra_deposit_min.get()),
+            float(self.nostra_deposit_max.get()),
+        ]
+        self.config["NOSTRA"]["DEPOSIT"] = True if self.nostra_deposit.get() else False
+        self.config["NOSTRA"]["BORROW"] = True if self.nostra_borrow.get() else False
+        self.config["NOSTRA"]["REPAY"] = True if self.nostra_repay.get() else False
+        self.config["NOSTRA"]["WITHDRAW"] = (
+            True if self.nostra_withdraw.get() else False
+        )
+
+        # NARWHAL_FINANCE
+        if "NARWHAL_FINANCE" not in self.config:
+            self.config["NARWHAL_FINANCE"] = {}
+
+        self.config["NARWHAL_FINANCE"]["AMOUNT_USDT_FOR_BET"] = [
+            int(float(self.narwhal_amount_min.get())),
+            int(float(self.narwhal_amount_max.get())),
+        ]
+
+        self.config["NARWHAL_FINANCE"]["NUMBER_OF_BETS_PER_START"] = [
+            int(float(self.narwhal_bets_min.get())),
+            int(float(self.narwhal_bets_max.get())),
+        ]
+
+        self.config["NARWHAL_FINANCE"]["PLAY_SLOTS"] = (
+            True if self.narwhal_slots.get() else False
+        )
+
+        self.config["NARWHAL_FINANCE"]["PLAY_DICE"] = (
+            True if self.narwhal_dice.get() else False
+        )
+
+        self.config["NARWHAL_FINANCE"]["PLAY_COINFLIP"] = (
+            True if self.narwhal_coinflip.get() else False
+        )
 
         # Save to file with improved formatting
         config_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.yaml")
-        
+
         # Custom YAML dumper for better formatting
         class OrderedDumper(yaml.SafeDumper):
             pass
-        
+
         def dict_representer(dumper, data):
             # For the withdrawal dictionary inside EXCHANGES, use a specific order
-            if isinstance(data, dict) and any(key in data for key in ["min_amount", "max_amount", "max_wait_time"]):
+            if isinstance(data, dict) and any(
+                key in data for key in ["min_amount", "max_amount", "max_wait_time"]
+            ):
                 # This appears to be a withdrawal configuration
                 ordered_items = []
                 # Ensure currency comes first if present
                 if "currency" in data:
                     ordered_items.append(("currency", data["currency"]))
-                
+
                 # Custom order for key withdrawal parameters
-                order_priority = ["networks", "min_amount", "max_amount", "max_balance", "wait_for_funds", "max_wait_time", "retries"]
-                
+                order_priority = [
+                    "networks",
+                    "min_amount",
+                    "max_amount",
+                    "max_balance",
+                    "wait_for_funds",
+                    "max_wait_time",
+                    "retries",
+                ]
+
                 for key in order_priority:
                     if key in data:
                         ordered_items.append((key, data[key]))
-                
+
                 # Add any remaining keys alphabetically
                 for key in sorted(data.keys()):
                     if key not in ["currency"] and key not in order_priority:
                         ordered_items.append((key, data[key]))
-                
-                return dumper.represent_mapping(yaml.resolver.Resolver.DEFAULT_MAPPING_TAG, ordered_items)
-            
+
+                return dumper.represent_mapping(
+                    yaml.resolver.Resolver.DEFAULT_MAPPING_TAG, ordered_items
+                )
+
             # For all other dictionaries, sort keys alphabetically
             return dumper.represent_mapping(
-                yaml.resolver.Resolver.DEFAULT_MAPPING_TAG,
-                sorted(data.items())
+                yaml.resolver.Resolver.DEFAULT_MAPPING_TAG, sorted(data.items())
             )
-        
+
         OrderedDumper.add_representer(dict, dict_representer)
-        
+
         with open(config_path, "w") as file:
             # Add a blank line between top-level sections
-            yaml_text = yaml.dump(self.config, Dumper=OrderedDumper, default_flow_style=False, sort_keys=False, width=80)
-            
+            yaml_text = yaml.dump(
+                self.config,
+                Dumper=OrderedDumper,
+                default_flow_style=False,
+                sort_keys=False,
+                width=80,
+            )
+
             # Insert blank lines between top-level sections for better readability
             formatted_lines = []
             prev_indent = None
-            
-            for line in yaml_text.split('\n'):
+
+            for line in yaml_text.split("\n"):
                 current_indent = len(line) - len(line.lstrip())
-                
+
                 # If this is a top-level key (no indent) and not the first line
                 if current_indent == 0 and line and prev_indent is not None:
-                    formatted_lines.append('')  # Add a blank line before new section
-                
+                    formatted_lines.append("")  # Add a blank line before new section
+
                 formatted_lines.append(line)
                 prev_indent = current_indent if line else prev_indent
-            
-            file.write('\n'.join(formatted_lines))
-            
+
+            file.write("\n".join(formatted_lines))
+
             print(f"Configuration saved to {config_path}")
 
     def run(self):
@@ -1099,6 +1413,12 @@ class ConfigUI:
 # Удалить или закомментировать эту часть, так как теперь запуск будет через метод run()
 # def main():
 #     app = ConfigUI()
+#     app.root.mainloop()
+
+
+# if __name__ == "__main__":
+#     main()
+
 #     app.root.mainloop()
 
 

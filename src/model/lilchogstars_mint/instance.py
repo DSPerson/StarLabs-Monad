@@ -9,6 +9,7 @@ from src.utils.constants import EXPLORER_URL, RPC_URL
 from src.utils.config import Config
 from loguru import logger
 
+
 # Обновляем ABI для контракта NFT
 ERC1155_ABI = [
     {
@@ -61,8 +62,12 @@ class Lilchogstars:
         self.session = session
 
         self.account: Account = Account.from_key(private_key=private_key)
-        self.web3 = AsyncWeb3(AsyncWeb3.AsyncHTTPProvider(RPC_URL))
-
+        self.web3 = AsyncWeb3(
+             AsyncWeb3.AsyncHTTPProvider(
+                 RPC_URL,
+                 request_kwargs={"proxy": (f"http://{proxy}"), "ssl": False},
+             )
+        ) 
         self.nft_contract_address = (
             "0xb33D7138c53e516871977094B249C8f2ab89a4F4"  # Updated contract address
         )
